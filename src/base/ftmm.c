@@ -23,6 +23,7 @@
 #include FT_INTERNAL_OBJECTS_H
 #include FT_SERVICE_MULTIPLE_MASTERS_H
 
+#include <alloca.h>
 
   /*************************************************************************/
   /*                                                                       */
@@ -144,6 +145,26 @@
     if ( !error )
     {
       error = FT_ERR( Invalid_Argument );
+      if ( service_mm->get_var_design )
+      {
+        FT_Fixed *my_coords;
+        FT_UInt i;
+
+        my_coords = alloca (sizeof(FT_Fixed) * num_coords);
+
+        error = service_mm->get_var_design( face, num_coords, my_coords );
+        if (error)
+          return error;
+
+        for (i = 0; i < num_coords; i++)
+        {
+          if (coords[i] != my_coords[i])
+            break;
+        }
+        if (i == num_coords)
+          return 0;
+      }
+
       if ( service->set_var_design )
         error = service->set_var_design( face, num_coords, coords );
     }
